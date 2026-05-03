@@ -1,0 +1,128 @@
+/* ===================================
+   NeoAttend Visual Enhancements
+   Background Image and Logo
+   =================================== */
+
+/* ===== Background System ===== */
+body {
+    position: relative;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../images/college.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -2;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.7) 0%, 
+        rgba(0, 0, 0, 0.5) 50%, 
+        rgba(0, 0, 0, 0.6) 100%);
+    z-index: -1;
+}
+
+/* ===== Main Content Wrapper ===== */
+.main-content-wrapper {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* ===== Login/Register Page Enhancements ===== */
+.login-container,
+.register-container {
+    position: relative;
+    z-index: 2;
+}
+
+.login-card,
+.register-card,
+.card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Logo in Navbar ===== */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.navbar-brand img {
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 5px;
+}
+
+/* ===== Logo for Login/Register Pages ===== */
+.login-logo-container,
+.register-logo-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-logo-container img,
+.register-logo-container img {
+    height: 80px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: white;
+    padding: 10px;
+}
+
+/* ===== Dashboard Page Enhancements ===== */
+.dashboard-container,
+.main-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== Force Background on All Pages ===== */
+html, body {
+    height: 100%;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .navbar-brand img {
+        height: 30px;
+    }
+    
+    .login-logo-container img,
+    .register-logo-container img {
+        height: 60px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand img {
+        height: 25px;
+    }
+    
+    .login-logo-container img,
+    .register-logo-container img {
+        height: 50px;
+    }
+}

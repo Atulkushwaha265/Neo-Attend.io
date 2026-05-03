@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NeoAttend | Students</title>
+    <style>
+     /* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    color: #333;
+}
+
+/* ================= HEADER ================= */
+.header {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.logo-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.teacher-info {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ================= MAIN ================= */
+.main {
+    padding: 25px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ================= TABLE CARD ================= */
+.table-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.table-card h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background: #4a90e2;
+    color: #fff;
+}
+
+th, td {
+    padding: 12px 14px;
+    text-align: left;
+}
+
+th {
+    font-weight: 600;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f2f7ff;
+}
+
+/* ================= STATUS COLORS ================= */
+.present-text {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.late-text {
+    color: #f39c12;
+    font-weight: 600;
+}
+
+.absent-text {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 10px;
+    }
+}
+   
+    </style>
+</head>    
+<body>
+
+<div class="header">
+    <div class="logo-box">
+        <img src="{{ url_for('static', filename='neoattend.png') }}" class="logo">
+        <span class="title">NeoAttend</span>
+    </div>
+    <div class="nav-links">
+        <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+    </div>
+    <div class="teacher-info">
+        Student Management
+    </div>
+</div>
+
+<div class="main">
+    <div class="table-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Students List</h3>
+            
+            <!-- Section Filter Dropdown -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="section-filter" style="font-weight: 600;">Filter by Section:</label>
+                <select id="section-filter" onchange="filterBySection()" style="padding: 8px 12px; border: 2px solid #4a90e2; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
+                    {% for section in sections %}
+                        <option value="{{ section[0] }}" {% if section[0] == selected_section_id %}selected{% endif %}>
+                            {{ section[1] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Section</th>
+                    <th>Total Attendance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{s.roll_no}}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.section }}</td>
+                    <td>{{ s.attendance_percent}}%</td>
+                    <td class="{{ s.status_class}}">{{ s.status}}</td>
+                </tr>
+               {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterBySection() {
+    const sectionId = document.getElementById('section-filter').value;
+    window.location.href = `{{ url_for('admin.student_info') }}?section_id=${sectionId}`;
+}
+</script>
+
+</body>
+</html>

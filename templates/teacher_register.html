@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Registration | NeoAttend</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global-style.css') }}">
+</head>
+<body>
+
+<div class="card" style="max-width:400px;margin:80px auto; text-align: center;">
+
+     <img src="{{ url_for('static', filename='neoattend.png') }}"
+         style="width:80px;margin-bottom:10px;">
+    <h3>Teacher Registration</h3>
+
+    {% if error %}
+        <p class="absent-text">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('teacher.register') }}">
+        <input type="text" name="name" placeholder="Full Name" required><br><br>
+        <input type="email" name="email" placeholder="Email" required><br><br>
+        <input type="password" name="password" placeholder="Password" required><br><br>
+
+        <button class="btn green" type="submit">Register</button>
+    </form>
+
+    <p style="margin-top:10px;">
+        Already registered?
+        <a href="{{ url_for('teacher.login') }}">Login</a>
+    </p>
+</div>
+
+</body>
+</html>

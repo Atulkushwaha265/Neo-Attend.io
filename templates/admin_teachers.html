@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachers Management | NeoAttend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+          body {
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            background:
+                linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+                url("{{ url_for('static', filename='images/college.jpg') }}")
+                no-repeat center center fixed;
+
+            background-size: cover;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c3e50 !important;
+        }
+        .badge-admin {
+            background-color: #6f42c1;
+        }
+        .badge-teacher {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>NeoAttend Portal
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link me-3" href="/">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user-shield me-1"></i>Admin
+                </span>
+                <a href="{{ url_for('teacher.logout') }}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.admin_dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.student_info') }}">
+                                <i class="fas fa-users me-2"></i>Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="{{ url_for('admin.manage_teachers') }}">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.attendance_records') }}">
+                                <i class="fas fa-calendar-check me-2"></i>Attendance Records
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.manage_communications') }}">
+                                <i class="fas fa-bullhorn me-2"></i>Communications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Teachers Management</h1>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+                        <i class="fas fa-plus me-1"></i>Add Teacher
+                    </button>
+                </div>
+
+                <!-- Teachers Table -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>All Teachers</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Assigned Section</th>
+                                        <th>Created Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                    <tr>
+                                        <td>{{ teacher[0] }}</td>
+                                        <td><strong>{{ teacher[1] }}</strong></td>
+                                        <td>{{ teacher[2] }}</td>
+                                        <td>
+                                            {% if teacher[3] == 'admin' %}
+                                                <span class="badge badge-admin">Admin</span>
+                                            {% else %}
+                                                <span class="badge badge-teacher">Teacher</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ teacher[5] or 'Not Assigned' }}</td>
+                                        <td>{{ teacher[4].strftime('%Y-%m-%d') if teacher[4] else 'N/A' }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                {% if teacher[3] != 'admin' %}
+                                                <button class="btn btn-outline-primary btn-sm" onclick="assignSection({{ teacher[0] }}, '{{ teacher[1]|e }}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Assign Section Modal -->
+    <div class="modal fade" id="assignSectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Section</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignSectionForm">
+                        <input type="hidden" id="teacherId" name="teacher_id">
+                        <div class="mb-3">
+                            <label for="teacherName" class="form-label">Teacher Name</label>
+                            <input type="text" class="form-control" id="teacherName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sectionSelect" class="form-label">Assign Section</label>
+                            <select class="form-select" id="sectionSelect" name="section_id" required>
+                                <option value="">Select Section</option>
+                                {% for section in sections %}
+                                <option value="{{ section[0] }}">{{ section[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSectionAssignment()">Save Assignment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function assignSection(teacherId, teacherName) {
+            document.getElementById('teacherId').value = teacherId;
+            document.getElementById('teacherName').value = teacherName;
+            new bootstrap.Modal(document.getElementById('assignSectionModal')).show();
+        }
+
+        function saveSectionAssignment() {
+            const form = document.getElementById('assignSectionForm');
+            const formData = new FormData(form);
+            
+            fetch('/admin/assign_section', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while assigning section');
+            });
+        }
+    </script>
+</body>
+</html>

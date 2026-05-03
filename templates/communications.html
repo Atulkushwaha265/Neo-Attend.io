@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communications | NeoAttend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #eef4f8 0%, #f8fbfd 100%);
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #17324a 0%, #24516d 100%);
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0.2rem 0.75rem;
+            border-radius: 12px;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.14);
+        }
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(23, 50, 74, 0.08);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #17324a !important;
+        }
+        .feed-item {
+            border: 1px solid rgba(23, 50, 74, 0.08);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.9rem;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-bullhorn me-2"></i>NeoAttend Communications
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link me-3" href="/">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-1"></i>{{ teacher_name }}
+                </span>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-building me-1"></i>{{ section_name }}
+                </span>
+                <a href="{{ url_for('teacher.logout') }}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        {% if page_role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.admin_dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.student_info') }}">
+                                <i class="fas fa-users me-2"></i>Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.manage_teachers') }}">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('admin.attendance_records') }}">
+                                <i class="fas fa-calendar-check me-2"></i>Attendance Records
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="{{ url_for('admin.manage_communications') }}">
+                                <i class="fas fa-bullhorn me-2"></i>Communications
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.teacher_dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.view_students') }}">
+                                <i class="fas fa-users me-2"></i>My Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.view_attendance') }}">
+                                <i class="fas fa-calendar-check me-2"></i>Attendance Records
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="{{ url_for('teacher.manage_communications') }}">
+                                <i class="fas fa-bullhorn me-2"></i>Communications
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap align-items-center mb-4">
+                    <div>
+                        <h1 class="h2 mb-1">Student Communications</h1>
+                        <p class="text-muted mb-0">Publish notices, study materials, and upcoming schedule items for students.</p>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="row">
+                    <div class="col-xl-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Publish Notice</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST">
+                                    <input type="hidden" name="form_type" value="notice">
+                                    <div class="mb-3">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" name="title" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Category</label>
+                                        <select name="category" class="form-select">
+                                            <option value="Notice">Notice</option>
+                                            <option value="Exam Update">Exam Update</option>
+                                            <option value="Event">Event</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Target Section</label>
+                                        {% if allow_all_sections %}
+                                        <select name="section_id" class="form-select">
+                                            <option value="">All Sections</option>
+                                            {% for section in sections %}
+                                            <option value="{{ section[0] }}">{{ section[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% else %}
+                                        <input type="hidden" name="section_id" value="{{ sections[0][0] }}">
+                                        <input type="text" class="form-control" value="{{ sections[0][1] }}" readonly>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Message</label>
+                                        <textarea name="content" class="form-control" rows="4" required></textarea>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="urgent" id="urgentNotice">
+                                        <label class="form-check-label" for="urgentNotice">Mark as urgent</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Publish Notice</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>Share Study Material</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST">
+                                    <input type="hidden" name="form_type" value="material">
+                                    <div class="mb-3">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" name="title" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Subject</label>
+                                        <input type="text" name="subject" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Target Section</label>
+                                        {% if allow_all_sections %}
+                                        <select name="section_id" class="form-select" required>
+                                            <option value="">Select Section</option>
+                                            {% for section in sections %}
+                                            <option value="{{ section[0] }}">{{ section[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% else %}
+                                        <input type="hidden" name="section_id" value="{{ sections[0][0] }}">
+                                        <input type="text" class="form-control" value="{{ sections[0][1] }}" readonly>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Resource Link or File Path</label>
+                                        <input type="text" name="file_path" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <textarea name="description" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Share Material</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Add Schedule</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST">
+                                    <input type="hidden" name="form_type" value="schedule">
+                                    <div class="mb-3">
+                                        <label class="form-label">Subject</label>
+                                        <input type="text" name="subject" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Target Section</label>
+                                        {% if allow_all_sections %}
+                                        <select name="section_id" class="form-select" required>
+                                            <option value="">Select Section</option>
+                                            {% for section in sections %}
+                                            <option value="{{ section[0] }}">{{ section[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% else %}
+                                        <input type="hidden" name="section_id" value="{{ sections[0][0] }}">
+                                        <input type="text" class="form-control" value="{{ sections[0][1] }}" readonly>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Date</label>
+                                            <input type="date" name="schedule_date" class="form-control" required>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Type</label>
+                                            <select name="session_type" class="form-select">
+                                                <option value="Lecture">Lecture</option>
+                                                <option value="Lab">Lab</option>
+                                                <option value="Tutorial">Tutorial</option>
+                                                <option value="Exam">Exam</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Start Time</label>
+                                            <input type="time" name="start_time" class="form-control" required>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">End Time</label>
+                                            <input type="time" name="end_time" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Room</label>
+                                        <input type="text" name="room" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Add Schedule Item</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Recent Notices</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if notices %}
+                                    {% for notice in notices %}
+                                    <div class="feed-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-1">{{ notice.title }}</h6>
+                                                <span class="badge bg-secondary">{{ notice.category }}</span>
+                                                {% if notice.urgent %}
+                                                <span class="badge bg-danger ms-1">Urgent</span>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted">{{ notice.date }}</small>
+                                        </div>
+                                        <div class="small text-muted mb-2">{{ notice.section_name }}</div>
+                                        <p class="mb-0 small">{{ notice.content }}</p>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted mb-0">No notices published yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Recent Study Materials</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if materials %}
+                                    {% for material in materials %}
+                                    <div class="feed-item">
+                                        <h6 class="mb-1">{{ material.title }}</h6>
+                                        <div class="small text-muted mb-2">{{ material.subject }} | {{ material.section_name }} | {{ material.upload_date }}</div>
+                                        {% if material.description %}
+                                        <p class="mb-2 small">{{ material.description }}</p>
+                                        {% endif %}
+                                        <a href="{{ material.file_path }}" class="btn btn-sm btn-outline-primary">Open Resource</a>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted mb-0">No materials shared yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Upcoming Schedule</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if schedules %}
+                                    {% for item in schedules %}
+                                    <div class="feed-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="mb-0">{{ item.subject }}</h6>
+                                            <span class="badge bg-primary">{{ item.session_type }}</span>
+                                        </div>
+                                        <div class="small text-muted">{{ item.section_name }}</div>
+                                        <div class="small text-muted">{{ item.schedule_date }} | {{ item.time }}</div>
+                                        <div class="small text-muted">{{ item.room }}</div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted mb-0">No upcoming schedule items added yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

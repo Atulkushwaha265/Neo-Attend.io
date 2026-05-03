@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global-style.css') }}">
+
+<style>
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* animated background */
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* container */
+        .container {
+            background: rgba(87, 84, 84, 0.6);
+            width: 100%;
+            max-width: 380px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        /* form layout */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 9px 12px;
+            margin-top: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:hover {
+            border-color: #4a90e2;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 6px rgba(74, 144, 226, 0.6);
+        }
+
+        /* buttons */
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .capture-btn {
+            background: #4a90e2;
+            color: #fff;
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.6);
+        }
+
+        .register-btn {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .register-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.6);
+        }
+
+        button:disabled {
+            background: #b5b5b5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* messages */
+        .msg {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .msg.success {
+            color: #2ecc71;
+        }
+
+        .msg.error {
+            color: #e74c3c;
+        }
+        select {
+            width: 100%;
+            padding: 9px 12px;
+            margin-top: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+
+                /* default arrow remove */
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            /* hover effect */
+            select:hover {
+                border-color: #4a90e2;
+            }
+
+            /* focus effect */
+            select:focus {
+                outline: none;
+                border-color: #4a90e2;
+                box-shadow: 0 0 6px rgba(74, 144, 226, 0.6);
+            }
+
+/* placeholder option */
+            select option[value=""] {
+                color: #999;
+            }
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Student Registration</h2>
+
+    <!-- Face Capture -->
+    <form method="POST" action="/capture_face">
+        <button type="submit" class="capture-btn">Capture Face</button>
+    </form>
+
+    {% if face_msg %}
+        <p class="msg">{{ face_msg }}</p>
+    {% endif %}
+
+    <!-- Registration Form -->
+    <form method="POST" action="/student/save">
+
+        <label>Name:</label>
+        <input type="text" name="name" required>
+
+        <label>Roll No:</label>
+        <input type="text" name="roll_no" required>
+
+        <label>Section:</label>
+        <!-- ✅ YAHI MAIN FIX HAI -->
+        <select name="section_id" required>
+            <option value="">Select Section</option>
+            <option value="1">A</option>
+            <option value="2">B</option>
+            <option value="3">C</option>
+        </select>
+
+        <button type="submit"
+                class="register-btn"
+                {% if not face_ready %}disabled{% endif %}>
+            Register Student
+        </button>
+    </form>
+
+    {% if reg_msg %}
+        <p class="msg">{{ reg_msg }}</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

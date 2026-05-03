@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Students | NeoAttend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        .attendance-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .low-attendance {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .good-attendance {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>NeoAttend
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-1"></i>{{ teacher_name }}
+                </span>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-building me-1"></i>{{ section }}
+                </span>
+                <a href="{{ url_for('teacher.logout') }}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.teacher_dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="{{ url_for('teacher.view_students') }}">
+                                <i class="fas fa-users me-2"></i>My Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.view_attendance') }}">
+                                <i class="fas fa-calendar-check me-2"></i>Attendance Records
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('teacher.manage_communications') }}">
+                                <i class="fas fa-bullhorn me-2"></i>Communications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">My Students</h1>
+                    <span class="text-muted">{{ section }}</span>
+                </div>
+
+                <!-- Students List -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Students List - {{ section }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Roll No</th>
+                                        <th>Name</th>
+                                        <th>Section</th>
+                                        <th>Total Classes</th>
+                                        <th>Attended</th>
+                                        <th>Attendance %</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr class="{% if student.attendance_percentage < 75 %}low-attendance{% else %}good-attendance{% endif %}">
+                                        <td><strong>{{ student.roll_no }}</strong></td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.section }}</td>
+                                        <td>{{ student.total_classes }}</td>
+                                        <td>{{ student.attended_classes }}</td>
+                                        <td>
+                                            <strong>{{ student.attendance_percentage }}%</strong>
+                                        </td>
+                                        <td>
+                                            {% if student.attendance_percentage >= 75 %}
+                                                <span class="badge bg-success attendance-badge">Good</span>
+                                            {% elif student.attendance_percentage >= 50 %}
+                                                <span class="badge bg-warning attendance-badge">Needs Improvement</span>
+                                            {% else %}
+                                                <span class="badge bg-danger attendance-badge">Critical</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if students|length == 0 %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No students found in your assigned section.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Summary Statistics -->
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Good Attendance (≥75%)
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ students|selectattr('attendance_percentage', '>=', 75)|list|length }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Needs Improvement (50-74%)
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ students|selectattr('attendance_percentage', '>=', 50)|selectattr('attendance_percentage', '<', 75)|list|length }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-left-danger shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                            Critical (<50%)
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ students|selectattr('attendance_percentage', '<', 50)|list|length }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

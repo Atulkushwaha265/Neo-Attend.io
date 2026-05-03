@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoAttend | Student Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global-style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1280px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .registration-section,
+        .camera-section {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
+        }
+
+        .registration-section {
+            flex: 1;
+            min-width: 360px;
+            max-width: 620px;
+            padding: 40px;
+        }
+
+        .camera-section {
+            flex: 1;
+            min-width: 340px;
+            max-width: 420px;
+            padding: 30px;
+            display: none;
+        }
+
+        .camera-section.active {
+            display: block;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-area i {
+            font-size: 46px;
+            color: #5ba1e7;
+            margin-bottom: 14px;
+        }
+
+        .logo-area h2 {
+            color: #1a202c;
+            font-weight: 700;
+            font-size: 26px;
+        }
+
+        .logo-area p {
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        .status-message {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-message.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5ba1e7, #6dd5fa);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565, #ed64a6);
+            color: white;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .face-status {
+            padding: 15px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #bfdbfe;
+        }
+
+        .face-status.captured {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        .face-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #5ba1e7;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(91, 161, 231, 0.12);
+        }
+
+        .form-group input:disabled,
+        .form-group select:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .helper-text {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .helper-text.error {
+            color: #b91c1c;
+        }
+
+        .camera-controls {
+            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .camera-control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .camera-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .camera-field select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #dbe4f0;
+            border-radius: 12px;
+            background: white;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .camera-field select:focus {
+            outline: none;
+            border-color: #5ba1e7;
+            box-shadow: 0 0 0 4px rgba(91, 161, 231, 0.12);
+        }
+
+        .camera-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        .btn-muted {
+            padding: 12px 16px;
+            background: white;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn-muted:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .camera-helper {
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .input-action-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-action-row input {
+            flex: 1;
+        }
+
+        .input-action-row .btn {
+            width: auto;
+            min-width: 140px;
+            flex-shrink: 0;
+            padding: 12px 18px;
+        }
+
+        .requirement-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 14px;
+            margin-top: 10px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .requirement-item.valid {
+            color: #166534;
+        }
+
+        .requirement-item i {
+            width: 14px;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            inset: 0;
+            border: 3px solid #5ba1e7;
+            border-radius: 16px;
+            pointer-events: none;
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            border: 2px dashed #fff;
+            border-radius: 50%;
+            opacity: 0.78;
+        }
+
+        .camera-tip {
+            margin-top: 14px;
+            padding: 14px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            color: #335c81;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .btn.loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .registration-section,
+            .camera-section {
+                max-width: 100%;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .requirement-list {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .input-action-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .input-action-row .btn {
+                width: 100%;
+            }
+
+            .camera-control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .camera-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="registration-section">
+            <div class="logo-area">
+                <i class="fas fa-user-plus"></i>
+                <h2>Student Registration</h2>
+                <p>Create a secure student account with face recognition</p>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+
+            <div class="btn-group">
+                <button id="startCameraBtn" class="btn btn-primary" type="button">
+                    <i class="fas fa-camera"></i>
+                    <span class="btn-text">Start Camera</span>
+                    <div class="loading-spinner"></div>
+                </button>
+                <button id="captureFaceBtn" class="btn btn-success" type="button" disabled>
+                    <i class="fas fa-camera-retro"></i>
+                    <span class="btn-text">Capture Face</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </div>
+
+            <div id="faceStatus" class="face-status">
+                <i class="fas fa-info-circle"></i>
+                <span id="faceStatusText">Face not captured yet</span>
+            </div>
+
+            <div class="camera-controls">
+                <div class="camera-control-grid">
+                    <div class="camera-field">
+                        <label for="cameraPreference">Camera Preference</label>
+                        <select id="cameraPreference">
+                            <option value="auto">Auto (Prefer iVCam / Phone)</option>
+                            <option value="phone">Use iVCam / Phone Camera</option>
+                            <option value="builtin">Use Built-in Webcam</option>
+                        </select>
+                    </div>
+
+                    <div class="camera-field">
+                        <label for="cameraDevice">Specific Camera</label>
+                        <select id="cameraDevice">
+                            <option value="auto">Use preference above</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="camera-actions">
+                    <button id="refreshCamerasBtn" class="btn-muted" type="button">
+                        <i class="fas fa-rotate-right"></i>
+                        <span>Refresh Cameras</span>
+                    </button>
+                </div>
+
+                <div id="cameraHelp" class="camera-helper">
+                    Choose `Auto` to prefer iVCam. You can also switch to the built-in webcam any time.
+                </div>
+            </div>
+
+            <form id="registrationForm" novalidate>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter student's full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="roll_no">Roll Number *</label>
+                        <input type="text" id="roll_no" name="roll_no" required placeholder="Enter roll number">
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="email">College Email *</label>
+                        <div class="input-action-row">
+                            <input type="email" id="email" name="email" required placeholder="name@axiscolleges.in">
+                            <button id="sendOtpBtn" class="btn btn-secondary" type="button">
+                                <i class="fas fa-paper-plane"></i>
+                                <span class="btn-text">Send OTP</span>
+                                <div class="loading-spinner"></div>
+                            </button>
+                        </div>
+                        <div id="emailHelp" class="helper-text">Only college emails ending with @axiscolleges.in are allowed.</div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="otp">Email OTP Verification *</label>
+                        <div class="input-action-row">
+                            <input type="text" id="otp" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit OTP">
+                            <button id="verifyOtpBtn" class="btn btn-secondary" type="button" disabled>
+                                <i class="fas fa-check-circle"></i>
+                                <span class="btn-text">Verify OTP</span>
+                                <div class="loading-spinner"></div>
+                            </button>
+                        </div>
+                        <div id="otpHelp" class="helper-text">Click "Send OTP" to verify your college email. OTP is valid for 5 minutes.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="section_id">Section *</label>
+                        <select id="section_id" name="section_id" required>
+                            <option value="">Select Section</option>
+                            <option value="1">Section A</option>
+                            <option value="2">Section B</option>
+                            <option value="3">Section C</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Create Password *</label>
+                        <input type="password" id="password" name="password" required placeholder="Create a strong password">
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="confirm_password">Confirm Password *</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+                        <div id="confirmHelp" class="helper-text">Passwords must match exactly.</div>
+                    </div>
+                </div>
+
+                <div class="requirement-list" id="passwordRequirements">
+                    <div class="requirement-item" data-rule="length"><i class="fas fa-circle"></i><span>Minimum 8 characters</span></div>
+                    <div class="requirement-item" data-rule="uppercase"><i class="fas fa-circle"></i><span>One uppercase letter</span></div>
+                    <div class="requirement-item" data-rule="lowercase"><i class="fas fa-circle"></i><span>One lowercase letter</span></div>
+                    <div class="requirement-item" data-rule="number"><i class="fas fa-circle"></i><span>One number</span></div>
+                    <div class="requirement-item" data-rule="special"><i class="fas fa-circle"></i><span>One special character</span></div>
+                </div>
+
+                <button type="submit" id="registerBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-user-check"></i>
+                    <span class="btn-text">Register Student</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <div id="cameraSection" class="camera-section">
+            <h3 style="text-align:center; margin-bottom:20px; color:#1a202c;">Face Capture</h3>
+
+            <div class="camera-preview">
+                <video id="videoElement" autoplay playsinline></video>
+                <div class="camera-overlay">
+                    <div class="face-guide"></div>
+                </div>
+            </div>
+
+            <button id="stopCameraBtn" class="btn btn-danger" type="button">
+                <i class="fas fa-stop"></i>
+                <span class="btn-text">Stop Camera</span>
+            </button>
+
+            <div class="camera-tip">
+                <i class="fas fa-info-circle"></i>
+                Position a single face inside the guide for the best capture.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StudentRegistrationSystem {
+            constructor() {
+                this.video = document.getElementById('videoElement');
+                this.stream = null;
+                this.faceCaptured = false;
+                this.isProcessing = false;
+                this.emailPattern = /^[A-Za-z0-9._%+-]+@axiscolleges\.in$/i;
+                this.otpSent = false;
+                this.otpVerified = false;
+                this.otpExpiresAt = null;
+                this.otpTimer = null;
+                this.lastOtpEmail = '';
+                this.otpFeedback = null;
+                this.cameraDevices = [];
+                this.permissionPrimed = false;
+                this.cameraPreferenceKey = 'neoattend_registration_camera_preference';
+                this.cameraDeviceKey = 'neoattend_registration_camera_device';
+                this.init();
+            }
+
+            init() {
+                document.getElementById('startCameraBtn').addEventListener('click', () => this.startCamera());
+                document.getElementById('captureFaceBtn').addEventListener('click', () => this.captureFace());
+                document.getElementById('stopCameraBtn').addEventListener('click', () => this.stopCamera());
+                document.getElementById('refreshCamerasBtn').addEventListener('click', () => this.refreshCameraOptions(true));
+                document.getElementById('cameraPreference').addEventListener('change', () => this.handleCameraPreferenceChange());
+                document.getElementById('cameraDevice').addEventListener('change', () => this.handleSpecificCameraChange());
+                document.getElementById('sendOtpBtn').addEventListener('click', () => this.sendOtp());
+                document.getElementById('verifyOtpBtn').addEventListener('click', () => this.verifyOtp());
+                document.getElementById('registrationForm').addEventListener('submit', (event) => this.handleRegistration(event));
+
+                ['name', 'roll_no', 'section_id', 'password', 'confirm_password'].forEach((id) => {
+                    document.getElementById(id).addEventListener('input', () => this.updateValidationState());
+                    document.getElementById(id).addEventListener('change', () => this.updateValidationState());
+                });
+
+                document.getElementById('email').addEventListener('input', () => this.handleEmailChange());
+                document.getElementById('email').addEventListener('change', () => this.handleEmailChange());
+                document.getElementById('otp').addEventListener('input', (event) => this.handleOtpInput(event));
+                document.getElementById('otp').addEventListener('change', () => this.updateValidationState());
+
+                this.restoreCameraSettings();
+                this.refreshCameraOptions(false);
+
+                if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+                    navigator.mediaDevices.addEventListener('devicechange', () => this.refreshCameraOptions(false));
+                }
+
+                this.updateValidationState();
+            }
+
+            restoreCameraSettings() {
+                const savedPreference = window.localStorage.getItem(this.cameraPreferenceKey);
+                const savedDevice = window.localStorage.getItem(this.cameraDeviceKey);
+
+                if (savedPreference) {
+                    document.getElementById('cameraPreference').value = savedPreference;
+                }
+
+                if (savedDevice) {
+                    document.getElementById('cameraDevice').dataset.savedValue = savedDevice;
+                }
+            }
+
+            saveCameraSettings() {
+                window.localStorage.setItem(
+                    this.cameraPreferenceKey,
+                    document.getElementById('cameraPreference').value
+                );
+                window.localStorage.setItem(
+                    this.cameraDeviceKey,
+                    document.getElementById('cameraDevice').value
+                );
+            }
+
+            async handleCameraSettingChange() {
+                this.saveCameraSettings();
+                this.updateCameraHelp();
+
+                if (this.stream) {
+                    this.showStatus('Switching camera source...', 'info');
+                    await this.restartCamera();
+                }
+            }
+
+            async handleCameraPreferenceChange() {
+                document.getElementById('cameraDevice').value = 'auto';
+                await this.handleCameraSettingChange();
+            }
+
+            async handleSpecificCameraChange() {
+                await this.handleCameraSettingChange();
+            }
+
+            async restartCamera() {
+                this.stopCamera(false);
+                await this.startCamera();
+            }
+
+            normalizeLabel(label) {
+                return (label || '').trim();
+            }
+
+            isPhoneCameraLabel(label) {
+                const normalized = label.toLowerCase();
+                return [
+                    'ivcam',
+                    'droidcam',
+                    'epoccam',
+                    'camo',
+                    'iphone',
+                    'android',
+                    'phone',
+                    'mobile'
+                ].some((keyword) => normalized.includes(keyword));
+            }
+
+            isBuiltInCameraLabel(label) {
+                const normalized = label.toLowerCase();
+                return [
+                    'integrated',
+                    'built-in',
+                    'builtin',
+                    'facetime',
+                    'webcam',
+                    'front camera',
+                    'user facing'
+                ].some((keyword) => normalized.includes(keyword));
+            }
+
+            formatDeviceLabel(device, index) {
+                const label = this.normalizeLabel(device.label) || `Camera ${index + 1}`;
+
+                if (this.isPhoneCameraLabel(label)) {
+                    return `${label} (Phone / iVCam)`;
+                }
+
+                if (this.isBuiltInCameraLabel(label)) {
+                    return `${label} (Built-in)`;
+                }
+
+                return label;
+            }
+
+            async ensureCameraPermission() {
+                if (this.permissionPrimed) {
+                    return true;
+                }
+
+                const tempStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+
+                tempStream.getTracks().forEach((track) => track.stop());
+                this.permissionPrimed = true;
+                return true;
+            }
+
+            async refreshCameraOptions(requestPermission = true) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                    this.cameraDevices = [];
+                    this.updateCameraDeviceDropdown();
+                    this.updateCameraHelp('Camera selection is not supported in this browser.');
+                    return;
+                }
+
+                try {
+                    if (requestPermission) {
+                        await this.ensureCameraPermission();
+                    }
+
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
+                    this.updateCameraDeviceDropdown();
+                    this.updateCameraHelp();
+
+                    if (requestPermission) {
+                        this.showStatus('Camera list refreshed successfully.', 'info', true);
+                    }
+                } catch (error) {
+                    console.error('Camera detection error:', error);
+                    this.updateCameraHelp('Allow camera permission once to detect iVCam and webcam names.');
+                    if (requestPermission) {
+                        this.showStatus('Camera list could not be refreshed. Please allow camera access.', 'error');
+                    }
+                }
+            }
+
+            updateCameraDeviceDropdown() {
+                const cameraDevice = document.getElementById('cameraDevice');
+                const currentValue = cameraDevice.value;
+                const savedValue = cameraDevice.dataset.savedValue || window.localStorage.getItem(this.cameraDeviceKey) || 'auto';
+
+                cameraDevice.innerHTML = '<option value="auto">Use preference above</option>';
+
+                this.cameraDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.textContent = this.formatDeviceLabel(device, index);
+                    cameraDevice.appendChild(option);
+                });
+
+                const preferredValue = [currentValue, savedValue].find((value) =>
+                    value === 'auto' || this.cameraDevices.some((device) => device.deviceId === value)
+                ) || 'auto';
+
+                cameraDevice.value = preferredValue;
+                delete cameraDevice.dataset.savedValue;
+                this.saveCameraSettings();
+            }
+
+            pickDeviceByPreference() {
+                if (!this.cameraDevices.length) {
+                    return null;
+                }
+
+                const exactDeviceId = document.getElementById('cameraDevice').value;
+                if (exactDeviceId && exactDeviceId !== 'auto') {
+                    return this.cameraDevices.find((device) => device.deviceId === exactDeviceId) || null;
+                }
+
+                const preference = document.getElementById('cameraPreference').value;
+                const phoneCamera = this.cameraDevices.find((device) => this.isPhoneCameraLabel(device.label));
+                const builtInCamera = this.cameraDevices.find((device) => this.isBuiltInCameraLabel(device.label));
+
+                if (preference === 'phone') {
+                    return phoneCamera || this.cameraDevices[0];
+                }
+
+                if (preference === 'builtin') {
+                    return builtInCamera || this.cameraDevices[0];
+                }
+
+                return phoneCamera || builtInCamera || this.cameraDevices[0];
+            }
+
+            updateCameraHelp(customMessage = '') {
+                const helpEl = document.getElementById('cameraHelp');
+
+                if (customMessage) {
+                    helpEl.textContent = customMessage;
+                    return;
+                }
+
+                if (!this.cameraDevices.length) {
+                    helpEl.textContent = 'Click "Refresh Cameras" or "Start Camera" to detect iVCam and webcam options.';
+                    return;
+                }
+
+                const selectedDevice = this.pickDeviceByPreference();
+                if (!selectedDevice) {
+                    helpEl.textContent = `Detected ${this.cameraDevices.length} camera(s). Choose the one you want to use.`;
+                    return;
+                }
+
+                const selectedLabel = this.formatDeviceLabel(
+                    selectedDevice,
+                    this.cameraDevices.findIndex((device) => device.deviceId === selectedDevice.deviceId)
+                );
+                helpEl.textContent = `Detected ${this.cameraDevices.length} camera(s). Current choice: ${selectedLabel}.`;
+            }
+
+            async buildVideoConstraints() {
+                await this.refreshCameraOptions(true);
+
+                const selectedDevice = this.pickDeviceByPreference();
+                const baseConstraints = {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                };
+
+                if (selectedDevice) {
+                    return {
+                        video: {
+                            ...baseConstraints,
+                            deviceId: { exact: selectedDevice.deviceId }
+                        },
+                        audio: false
+                    };
+                }
+
+                return {
+                    video: {
+                        ...baseConstraints,
+                        facingMode: 'user'
+                    },
+                    audio: false
+                };
+            }
+
+            getActiveTrackLabel() {
+                if (!this.stream) {
+                    return '';
+                }
+
+                const [track] = this.stream.getVideoTracks();
+                return track ? this.normalizeLabel(track.label) : '';
+            }
+
+            getEmailValue() {
+                return document.getElementById('email').value.trim().toLowerCase();
+            }
+
+            clearOtpTimer() {
+                if (this.otpTimer) {
+                    window.clearInterval(this.otpTimer);
+                    this.otpTimer = null;
+                }
+            }
+
+            resetOtpState(message = '', type = 'info') {
+                this.clearOtpTimer();
+                this.otpSent = false;
+                this.otpVerified = false;
+                this.otpExpiresAt = null;
+                this.lastOtpEmail = '';
+                document.getElementById('otp').value = '';
+                this.otpFeedback = message ? { message, type } : null;
+            }
+
+            startOtpTimer(expiresInSeconds) {
+                this.clearOtpTimer();
+                this.otpExpiresAt = Date.now() + (expiresInSeconds * 1000);
+                this.updateOtpHelper();
+
+                this.otpTimer = window.setInterval(() => {
+                    if (this.getOtpSecondsRemaining() <= 0) {
+                        this.resetOtpState('OTP expired. Please send a new OTP.', 'error');
+                    }
+
+                    this.updateValidationState();
+                }, 1000);
+            }
+
+            getOtpSecondsRemaining() {
+                if (!this.otpExpiresAt) {
+                    return 0;
+                }
+
+                return Math.max(0, Math.ceil((this.otpExpiresAt - Date.now()) / 1000));
+            }
+
+            formatCountdown(totalSeconds) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+
+            handleEmailChange() {
+                const emailValue = this.getEmailValue();
+                if (this.lastOtpEmail && emailValue !== this.lastOtpEmail) {
+                    this.resetOtpState('Email changed. Please send OTP again for the new address.', 'error');
+                }
+
+                this.updateValidationState();
+            }
+
+            handleOtpInput(event) {
+                event.target.value = event.target.value.replace(/\D/g, '').slice(0, 6);
+                this.updateValidationState();
+            }
+
+            updateOtpHelper() {
+                const otpHelp = document.getElementById('otpHelp');
+                const secondsRemaining = this.getOtpSecondsRemaining();
+
+                if (this.otpVerified && secondsRemaining > 0) {
+                    otpHelp.textContent = `College email verified. Verification expires in ${this.formatCountdown(secondsRemaining)}.`;
+                    otpHelp.className = 'helper-text';
+                    return;
+                }
+
+                if (this.otpSent && secondsRemaining > 0) {
+                    otpHelp.textContent = `OTP sent to ${this.lastOtpEmail}. Expires in ${this.formatCountdown(secondsRemaining)}.`;
+                    otpHelp.className = 'helper-text';
+                    return;
+                }
+
+                if (this.otpFeedback) {
+                    otpHelp.textContent = this.otpFeedback.message;
+                    otpHelp.className = this.otpFeedback.type === 'error' ? 'helper-text error' : 'helper-text';
+                    return;
+                }
+
+                if (this.getEmailValue() === '') {
+                    otpHelp.textContent = 'Click "Send OTP" after entering your college email. OTP is valid for 5 minutes.';
+                    otpHelp.className = 'helper-text';
+                    return;
+                }
+
+                if (!this.isEmailValid()) {
+                    otpHelp.textContent = 'Enter a valid @axiscolleges.in email to receive OTP.';
+                    otpHelp.className = 'helper-text error';
+                    return;
+                }
+
+                otpHelp.textContent = 'Click "Send OTP" to verify your college email. OTP is valid for 5 minutes.';
+                otpHelp.className = 'helper-text';
+            }
+
+            isOtpVerifiedAndActive() {
+                return this.otpVerified &&
+                    this.lastOtpEmail === this.getEmailValue() &&
+                    this.getOtpSecondsRemaining() > 0;
+            }
+
+            async startCamera() {
+                if (this.stream) {
+                    return;
+                }
+
+                try {
+                    const constraints = await this.buildVideoConstraints();
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.permissionPrimed = true;
+
+                    this.video.srcObject = this.stream;
+                    document.getElementById('cameraSection').classList.add('active');
+                    document.getElementById('startCameraBtn').disabled = true;
+                    document.getElementById('captureFaceBtn').disabled = false;
+                    await this.refreshCameraOptions(false);
+                    const activeLabel = this.getActiveTrackLabel();
+                    this.showStatus(
+                        activeLabel
+                            ? `Camera started using ${activeLabel}. Capture the face before submitting the form.`
+                            : 'Camera started successfully. Capture the face before submitting the form.',
+                        'info'
+                    );
+                } catch (error) {
+                    console.error('Camera access error:', error);
+                    this.showStatus('Camera access denied or selected camera is unavailable. Please allow permission or choose another camera.', 'error');
+                }
+            }
+
+            stopCamera(showMessage = true) {
+                if (this.stream) {
+                    this.stream.getTracks().forEach((track) => track.stop());
+                    this.stream = null;
+                }
+
+                this.video.srcObject = null;
+                document.getElementById('cameraSection').classList.remove('active');
+                document.getElementById('startCameraBtn').disabled = false;
+                document.getElementById('captureFaceBtn').disabled = true;
+                if (showMessage) {
+                    this.showStatus('Camera stopped.', 'info');
+                }
+            }
+
+            async captureFace() {
+                if (this.isProcessing || !this.video.videoWidth || !this.video.videoHeight) {
+                    return;
+                }
+
+                this.isProcessing = true;
+                const captureBtn = document.getElementById('captureFaceBtn');
+                captureBtn.classList.add('loading');
+                captureBtn.disabled = true;
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = this.video.videoWidth;
+                    canvas.height = this.video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(this.video, 0, 0);
+
+                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+                    const formData = new FormData();
+                    formData.append('image', blob, 'face.jpg');
+
+                    const response = await fetch('/capture_face', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.faceCaptured = true;
+                        this.updateFaceStatus('Face captured successfully.', 'captured');
+                        this.showStatus('Face captured. Complete the form and register the student.', 'success');
+                        this.stopCamera(false);
+                    } else {
+                        this.faceCaptured = false;
+                        this.updateFaceStatus(result.error || 'Failed to capture face.', 'error');
+                        this.showStatus(result.error || 'Failed to capture face.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Capture error:', error);
+                    this.faceCaptured = false;
+                    this.updateFaceStatus('Failed to capture face. Please try again.', 'error');
+                    this.showStatus('Failed to capture face. Please try again.', 'error');
+                } finally {
+                    captureBtn.classList.remove('loading');
+                    captureBtn.disabled = !this.stream;
+                    this.isProcessing = false;
+                    this.updateValidationState();
+                }
+            }
+
+            getPasswordChecks() {
+                const password = document.getElementById('password').value;
+                return {
+                    length: password.length >= 8,
+                    uppercase: /[A-Z]/.test(password),
+                    lowercase: /[a-z]/.test(password),
+                    number: /\d/.test(password),
+                    special: /[^A-Za-z0-9]/.test(password)
+                };
+            }
+
+            isPasswordStrong() {
+                return Object.values(this.getPasswordChecks()).every(Boolean);
+            }
+
+            isEmailValid() {
+                return this.emailPattern.test(document.getElementById('email').value.trim());
+            }
+
+            doPasswordsMatch() {
+                return document.getElementById('password').value !== '' &&
+                    document.getElementById('password').value === document.getElementById('confirm_password').value;
+            }
+
+            isFormValid() {
+                const requiredFields = ['name', 'roll_no', 'email', 'section_id', 'password', 'confirm_password'];
+                const requiredFilled = requiredFields.every((id) => document.getElementById(id).value.trim() !== '');
+                return requiredFilled &&
+                    this.isEmailValid() &&
+                    this.isPasswordStrong() &&
+                    this.doPasswordsMatch() &&
+                    this.isOtpVerifiedAndActive();
+            }
+
+            updateValidationState() {
+                const emailHelp = document.getElementById('emailHelp');
+                const confirmHelp = document.getElementById('confirmHelp');
+                const sendOtpBtn = document.getElementById('sendOtpBtn');
+                const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+                const otpField = document.getElementById('otp');
+                const registerBtn = document.getElementById('registerBtn');
+                const emailValue = document.getElementById('email').value.trim();
+                const otpVerifiedAndActive = this.isOtpVerifiedAndActive();
+
+                if (emailValue === '') {
+                    emailHelp.textContent = 'Only college emails ending with @axiscolleges.in are allowed.';
+                    emailHelp.className = 'helper-text';
+                } else if (this.isEmailValid()) {
+                    emailHelp.textContent = otpVerifiedAndActive ? 'College email verified successfully.' : 'Valid college email.';
+                    emailHelp.className = 'helper-text';
+                } else {
+                    emailHelp.textContent = 'Enter a valid email ending with @axiscolleges.in.';
+                    emailHelp.className = 'helper-text error';
+                }
+
+                const checks = this.getPasswordChecks();
+                document.querySelectorAll('.requirement-item').forEach((item) => {
+                    const rule = item.dataset.rule;
+                    const icon = item.querySelector('i');
+                    if (checks[rule]) {
+                        item.classList.add('valid');
+                        icon.className = 'fas fa-check-circle';
+                    } else {
+                        item.classList.remove('valid');
+                        icon.className = 'fas fa-circle';
+                    }
+                });
+
+                const confirmValue = document.getElementById('confirm_password').value;
+                if (confirmValue === '') {
+                    confirmHelp.textContent = 'Passwords must match exactly.';
+                    confirmHelp.className = 'helper-text';
+                } else if (this.doPasswordsMatch()) {
+                    confirmHelp.textContent = 'Passwords match.';
+                    confirmHelp.className = 'helper-text';
+                } else {
+                    confirmHelp.textContent = 'Passwords do not match.';
+                    confirmHelp.className = 'helper-text error';
+                }
+
+                this.updateOtpHelper();
+
+                sendOtpBtn.querySelector('.btn-text').textContent = otpVerifiedAndActive
+                    ? 'Verified'
+                    : (this.otpSent ? 'Resend OTP' : 'Send OTP');
+                sendOtpBtn.disabled = !this.isEmailValid() || this.isProcessing || otpVerifiedAndActive;
+
+                otpField.disabled = !this.otpSent || this.isProcessing || otpVerifiedAndActive;
+                verifyOtpBtn.disabled = this.isProcessing ||
+                    !this.otpSent ||
+                    otpVerifiedAndActive ||
+                    otpField.value.trim().length !== 6;
+
+                registerBtn.disabled = !this.faceCaptured || !this.isFormValid() || this.isProcessing;
+            }
+
+            async sendOtp() {
+                if (this.isProcessing) {
+                    return;
+                }
+
+                if (!this.isEmailValid()) {
+                    this.showStatus('Enter a valid college email before requesting OTP.', 'error');
+                    this.updateValidationState();
+                    return;
+                }
+
+                this.isProcessing = true;
+                const sendOtpBtn = document.getElementById('sendOtpBtn');
+                sendOtpBtn.classList.add('loading');
+                sendOtpBtn.disabled = true;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('email', this.getEmailValue());
+
+                    const response = await fetch('/student/send-otp', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.otpSent = true;
+                        this.otpVerified = false;
+                        this.lastOtpEmail = this.getEmailValue();
+                        this.otpFeedback = null;
+                        document.getElementById('otp').value = '';
+                        this.startOtpTimer(result.expires_in || 300);
+                        this.showStatus(result.message || 'OTP sent successfully.', 'success');
+                    } else {
+                        this.resetOtpState();
+                        this.showStatus(result.error || 'Failed to send OTP.', 'error');
+                    }
+                } catch (error) {
+                    console.error('OTP send error:', error);
+                    this.resetOtpState();
+                    this.showStatus('Failed to send OTP. Please try again.', 'error');
+                } finally {
+                    sendOtpBtn.classList.remove('loading');
+                    this.isProcessing = false;
+                    this.updateValidationState();
+                }
+            }
+
+            async verifyOtp() {
+                if (this.isProcessing) {
+                    return;
+                }
+
+                if (!this.otpSent) {
+                    this.showStatus('Send OTP first before verification.', 'error');
+                    return;
+                }
+
+                const otpValue = document.getElementById('otp').value.trim();
+                if (otpValue.length !== 6) {
+                    this.showStatus('Enter the 6-digit OTP sent to your college email.', 'error');
+                    return;
+                }
+
+                this.isProcessing = true;
+                const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+                verifyOtpBtn.classList.add('loading');
+                verifyOtpBtn.disabled = true;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('email', this.getEmailValue());
+                    formData.append('otp', otpValue);
+
+                    const response = await fetch('/student/verify-otp', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.otpVerified = true;
+                        this.otpFeedback = null;
+                        if (result.expires_in) {
+                            this.startOtpTimer(result.expires_in);
+                        } else {
+                            this.updateOtpHelper();
+                        }
+                        this.showStatus(result.message || 'College email verified successfully.', 'success');
+                    } else {
+                        this.showStatus(result.error || 'OTP verification failed.', 'error');
+                    }
+                } catch (error) {
+                    console.error('OTP verification error:', error);
+                    this.showStatus('Failed to verify OTP. Please try again.', 'error');
+                } finally {
+                    verifyOtpBtn.classList.remove('loading');
+                    this.isProcessing = false;
+                    this.updateValidationState();
+                }
+            }
+
+            async handleRegistration(event) {
+                event.preventDefault();
+
+                if (!this.faceCaptured) {
+                    this.showStatus('Capture the student face before registering.', 'error');
+                    return;
+                }
+
+                if (!this.isOtpVerifiedAndActive()) {
+                    this.showStatus('Verify the college email with OTP before registering the student.', 'error');
+                    this.updateValidationState();
+                    return;
+                }
+
+                if (!this.isFormValid()) {
+                    this.showStatus('Complete the college email and strong password requirements before submitting.', 'error');
+                    this.updateValidationState();
+                    return;
+                }
+
+                if (this.isProcessing) {
+                    return;
+                }
+
+                this.isProcessing = true;
+                const registerBtn = document.getElementById('registerBtn');
+                registerBtn.classList.add('loading');
+                registerBtn.disabled = true;
+
+                try {
+                    const formData = new FormData(document.getElementById('registrationForm'));
+
+                    const response = await fetch('/student/save', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const successMessage = result.warning
+                            ? `${result.message || 'Student registered successfully.'} ${result.warning}`
+                            : (result.message || 'Student registered successfully.');
+                        this.showStatus(successMessage, 'success');
+                        document.getElementById('registrationForm').reset();
+                        this.resetOtpState();
+                        this.faceCaptured = false;
+                        this.updateFaceStatus('Face not captured yet', '');
+                        this.updateValidationState();
+                    } else {
+                        this.showStatus(result.error || 'Failed to register student.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    this.showStatus('Failed to register student. Please try again.', 'error');
+                } finally {
+                    registerBtn.classList.remove('loading');
+                    this.isProcessing = false;
+                    this.updateValidationState();
+                }
+            }
+
+            updateFaceStatus(message, type) {
+                const statusEl = document.getElementById('faceStatus');
+                document.getElementById('faceStatusText').textContent = message;
+                statusEl.className = `face-status ${type}`.trim();
+            }
+
+            showStatus(message, type) {
+                const statusEl = document.getElementById('statusMessage');
+                statusEl.textContent = message;
+                statusEl.className = `status-message ${type} show`;
+
+                window.clearTimeout(this.statusTimer);
+                this.statusTimer = window.setTimeout(() => {
+                    statusEl.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.studentRegistrationSystem = new StudentRegistrationSystem();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (window.studentRegistrationSystem && window.studentRegistrationSystem.stream) {
+                window.studentRegistrationSystem.stream.getTracks().forEach((track) => track.stop());
+            }
+
+            if (window.studentRegistrationSystem) {
+                window.studentRegistrationSystem.clearOtpTimer();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+/* ===== Registration Card ===== */
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body{
+    margin:0;
+    padding:0;
+    font-family: Arial, sans-serif;
+
+    background-image: url("../static/college.jpg"); /* image ka path */
+    background-size: cover;     /* image pura screen cover kare */
+    background-position: center;
+    background-repeat: no-repeat;
+    height:100vh;
+}
+.card {
+    background: #ffffff;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* logo */
+.card img {
+    display: block;
+    margin: 0 auto 10px;
+}
+
+/* heading */
+.card h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 20px;
+}
+
+/* error message */
+.absent-text {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* inputs */
+.card input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 6px rgba(74, 144, 226, 0.5);
+}
+
+/* button */
+.card .btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+/* footer text */
+.card p {
+    font-size: 14px;
+    color: #555;
+}
+
+.card a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}

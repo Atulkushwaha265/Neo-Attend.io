@@ -1,0 +1,231 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    color: #333;
+}
+
+/* ================= HEADER ================= */
+.header {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.logo-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.teacher-info {
+    font-size: 14px;
+}
+
+/* ================= MAIN ================= */
+.main {
+    padding: 25px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ================= CARDS ================= */
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.session-card h3 {
+    margin-bottom: 10px;
+}
+
+.session-card p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+/* status */
+.open {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.locked {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* buttons */
+.btn-group {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn.green {
+    background: #2ecc71;
+}
+
+.btn.red {
+    background: #e74c3c;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+/* ================= STATS ================= */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.stat-card h4 {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.stat-card p {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.stat-card.present p {
+    color: #2ecc71;
+}
+
+.stat-card.late p {
+    color: #f39c12;
+}
+
+.stat-card.absent p {
+    color: #e74c3c;
+}
+
+/* ================= TABLE ================= */
+.table-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.table-card h3 {
+    margin-bottom: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background: #4a90e2;
+    color: #fff;
+}
+
+th, td {
+    padding: 10px 12px;
+    text-align: left;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+    background: #f2f7ff;
+}
+
+/* status text */
+.present-text {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.late-text {
+    color: #f39c12;
+    font-weight: 600;
+}
+
+.absent-text {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/*    for header    */
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+
+    .teacher-info {
+        font-size: 13px;
+    }
+}

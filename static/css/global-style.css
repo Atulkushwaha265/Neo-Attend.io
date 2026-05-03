@@ -1,0 +1,40 @@
+/* ===== GLOBAL BACKGROUND ===== */
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+
+    background:
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url("../images/college.jpg")
+        no-repeat center center fixed;
+
+    background-size: cover;
+}
+
+/* ===== GLOBAL LOGO STYLE ===== */
+
+.global-logo {
+    height: 55px;
+    max-width: 100%;
+}
+
+
+/* ===== OPTIONAL: CENTER LOGO IF USED IN HEADER ===== */
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+
+/* ===== ENSURE CONTENT READABILITY ===== */
+
+.card,
+.login-card,
+.dashboard-card,
+.container-box {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+}

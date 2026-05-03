@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoAttend | Automatic Face Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1240px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .attendance-section,
+        .camera-section {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.13);
+        }
+
+        .attendance-section {
+            flex: 1;
+            min-width: 350px;
+            max-width: 520px;
+            padding: 40px;
+        }
+
+        .camera-section {
+            flex: 1;
+            min-width: 350px;
+            max-width: 430px;
+            padding: 30px;
+            display: none;
+        }
+
+        .camera-section.active {
+            display: block;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-area i {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 14px;
+        }
+
+        .logo-area h2 {
+            color: #1a202c;
+            font-weight: 700;
+            font-size: 26px;
+        }
+
+        .logo-area p {
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        .status-message {
+            padding: 15px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-message.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+
+        .scanner-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .scanner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #60a5fa;
+            box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.6);
+            animation: pulse 1.6s infinite;
+        }
+
+        .scanner-status.active .scanner-dot {
+            background: #10b981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+        }
+
+        .camera-controls {
+            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .camera-control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .camera-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .camera-field select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #dbe4f0;
+            border-radius: 12px;
+            background: white;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .camera-field select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+        }
+
+        .camera-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        .btn-secondary {
+            padding: 12px 16px;
+            background: white;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .camera-helper {
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(96, 165, 250, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
+        }
+
+        .btn-control {
+            width: 100%;
+            padding: 15px 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-control:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 22px rgba(102, 126, 234, 0.32);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f56565, #ed64a6);
+            margin-top: 16px;
+        }
+
+        .btn-control:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 320px;
+            background: #000;
+            border-radius: 18px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 18px;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            inset: 0;
+            border: 3px solid #667eea;
+            border-radius: 18px;
+            pointer-events: none;
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 170px;
+            height: 170px;
+            border: 2px dashed #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .camera-tip {
+            margin-top: 14px;
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 12px;
+            color: #475569;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .attendance-result {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .attendance-result.show {
+            display: block;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            color: #0f172a;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-badge.present {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.late {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .scan-note {
+            margin-top: 18px;
+            color: #475569;
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .attendance-section,
+            .camera-section {
+                max-width: 100%;
+            }
+
+            .camera-control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .camera-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="attendance-section">
+            <div class="logo-area">
+                <i class="fas fa-user-check"></i>
+                <h2>NeoAttend</h2>
+                <p>Automatic face recognition attendance</p>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+
+            <div id="scannerStatus" class="scanner-status">
+                <span class="scanner-dot"></span>
+                <span id="scannerStatusText">Camera is idle</span>
+            </div>
+
+            <div class="camera-controls">
+                <div class="camera-control-grid">
+                    <div class="camera-field">
+                        <label for="cameraPreference">Camera Preference</label>
+                        <select id="cameraPreference">
+                            <option value="auto">Auto (Prefer iVCam / Phone)</option>
+                            <option value="phone">Use iVCam / Phone Camera</option>
+                            <option value="builtin">Use Built-in Webcam</option>
+                        </select>
+                    </div>
+
+                    <div class="camera-field">
+                        <label for="cameraDevice">Specific Camera</label>
+                        <select id="cameraDevice">
+                            <option value="auto">Use preference above</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="camera-actions">
+                    <button id="refreshCamerasBtn" class="btn-secondary" type="button">
+                        <i class="fas fa-rotate-right"></i>
+                        <span>Refresh Cameras</span>
+                    </button>
+                </div>
+
+                <div id="cameraHelp" class="camera-helper">
+                    Choose `Auto` to prefer iVCam. You can also switch to the built-in webcam any time.
+                </div>
+            </div>
+
+            <button id="startCameraBtn" class="btn-control" type="button">
+                <i class="fas fa-camera"></i>
+                <span>Start Automatic Attendance</span>
+            </button>
+
+            <div id="attendanceResult" class="attendance-result">
+                <div class="result-row">
+                    <span class="result-label">Student Name</span>
+                    <span class="result-value" id="studentName">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Roll Number</span>
+                    <span class="result-value" id="rollNumber">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Section</span>
+                    <span class="result-value" id="section">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Date</span>
+                    <span class="result-value" id="attendanceDate">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Time</span>
+                    <span class="result-value" id="attendanceTime">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Status</span>
+                    <span class="result-value">
+                        <span id="statusBadge" class="status-badge">-</span>
+                    </span>
+                </div>
+            </div>
+
+            <p class="scan-note">
+                Once the camera starts, the system scans automatically. No capture button is needed.
+            </p>
+        </div>
+
+        <div id="cameraSection" class="camera-section">
+            <h3 style="text-align:center; margin-bottom:20px; color:#1a202c;">Live Camera Preview</h3>
+
+            <div class="camera-preview">
+                <video id="videoElement" autoplay playsinline></video>
+                <div class="camera-overlay">
+                    <div class="face-guide"></div>
+                </div>
+            </div>
+
+            <button id="stopCameraBtn" class="btn-control btn-stop" type="button">
+                <i class="fas fa-stop"></i>
+                <span>Stop Camera</span>
+            </button>
+
+            <div class="camera-tip">
+                <i class="fas fa-info-circle"></i>
+                Stand one student inside the guide and the system will detect and mark attendance automatically.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class FaceAttendanceSystem {
+            constructor() {
+                this.video = document.getElementById('videoElement');
+                this.stream = null;
+                this.isProcessing = false;
+                this.scanTimer = null;
+                this.autoDetectionActive = false;
+                this.lastStatusMessage = '';
+                this.lastStatusAt = 0;
+                this.cameraDevices = [];
+                this.permissionPrimed = false;
+                this.cameraPreferenceKey = 'neoattend_attendance_camera_preference';
+                this.cameraDeviceKey = 'neoattend_attendance_camera_device';
+                this.init();
+            }
+
+            init() {
+                document.getElementById('startCameraBtn').addEventListener('click', () => this.startCamera());
+                document.getElementById('stopCameraBtn').addEventListener('click', () => this.stopCamera());
+                document.getElementById('refreshCamerasBtn').addEventListener('click', () => this.refreshCameraOptions(true));
+                document.getElementById('cameraPreference').addEventListener('change', () => this.handleCameraPreferenceChange());
+                document.getElementById('cameraDevice').addEventListener('change', () => this.handleSpecificCameraChange());
+
+                this.restoreCameraSettings();
+                this.refreshCameraOptions(false);
+
+                if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+                    navigator.mediaDevices.addEventListener('devicechange', () => this.refreshCameraOptions(false));
+                }
+            }
+
+            restoreCameraSettings() {
+                const savedPreference = window.localStorage.getItem(this.cameraPreferenceKey);
+                const savedDevice = window.localStorage.getItem(this.cameraDeviceKey);
+
+                if (savedPreference) {
+                    document.getElementById('cameraPreference').value = savedPreference;
+                }
+
+                if (savedDevice) {
+                    document.getElementById('cameraDevice').dataset.savedValue = savedDevice;
+                }
+            }
+
+            saveCameraSettings() {
+                window.localStorage.setItem(
+                    this.cameraPreferenceKey,
+                    document.getElementById('cameraPreference').value
+                );
+                window.localStorage.setItem(
+                    this.cameraDeviceKey,
+                    document.getElementById('cameraDevice').value
+                );
+            }
+
+            async handleCameraSettingChange() {
+                this.saveCameraSettings();
+                this.updateCameraHelp();
+
+                if (this.stream) {
+                    this.showStatus('Switching camera source...', 'info');
+                    await this.restartCamera();
+                }
+            }
+
+            async handleCameraPreferenceChange() {
+                document.getElementById('cameraDevice').value = 'auto';
+                await this.handleCameraSettingChange();
+            }
+
+            async handleSpecificCameraChange() {
+                await this.handleCameraSettingChange();
+            }
+
+            async restartCamera() {
+                this.stopCamera(false);
+                await this.startCamera();
+            }
+
+            normalizeLabel(label) {
+                return (label || '').trim();
+            }
+
+            isPhoneCameraLabel(label) {
+                const normalized = label.toLowerCase();
+                return [
+                    'ivcam',
+                    'droidcam',
+                    'epoccam',
+                    'camo',
+                    'iphone',
+                    'android',
+                    'phone',
+                    'mobile'
+                ].some((keyword) => normalized.includes(keyword));
+            }
+
+            isBuiltInCameraLabel(label) {
+                const normalized = label.toLowerCase();
+                return [
+                    'integrated',
+                    'built-in',
+                    'builtin',
+                    'facetime',
+                    'webcam',
+                    'front camera',
+                    'user facing'
+                ].some((keyword) => normalized.includes(keyword));
+            }
+
+            formatDeviceLabel(device, index) {
+                const label = this.normalizeLabel(device.label) || `Camera ${index + 1}`;
+
+                if (this.isPhoneCameraLabel(label)) {
+                    return `${label} (Phone / iVCam)`;
+                }
+
+                if (this.isBuiltInCameraLabel(label)) {
+                    return `${label} (Built-in)`;
+                }
+
+                return label;
+            }
+
+            async ensureCameraPermission() {
+                if (this.permissionPrimed) {
+                    return true;
+                }
+
+                const tempStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+
+                tempStream.getTracks().forEach((track) => track.stop());
+                this.permissionPrimed = true;
+                return true;
+            }
+
+            async refreshCameraOptions(requestPermission = true) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                    this.cameraDevices = [];
+                    this.updateCameraDeviceDropdown();
+                    this.updateCameraHelp('Camera selection is not supported in this browser.');
+                    return;
+                }
+
+                try {
+                    if (requestPermission) {
+                        await this.ensureCameraPermission();
+                    }
+
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
+                    this.updateCameraDeviceDropdown();
+                    this.updateCameraHelp();
+
+                    if (requestPermission) {
+                        this.showStatus('Camera list refreshed successfully.', 'info', true);
+                    }
+                } catch (error) {
+                    console.error('Camera detection error:', error);
+                    this.updateCameraHelp('Allow camera permission once to detect iVCam and webcam names.');
+                    if (requestPermission) {
+                        this.showStatus('Camera list could not be refreshed. Please allow camera access.', 'error');
+                    }
+                }
+            }
+
+            updateCameraDeviceDropdown() {
+                const cameraDevice = document.getElementById('cameraDevice');
+                const currentValue = cameraDevice.value;
+                const savedValue = cameraDevice.dataset.savedValue || window.localStorage.getItem(this.cameraDeviceKey) || 'auto';
+
+                cameraDevice.innerHTML = '<option value="auto">Use preference above</option>';
+
+                this.cameraDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.textContent = this.formatDeviceLabel(device, index);
+                    cameraDevice.appendChild(option);
+                });
+
+                const preferredValue = [currentValue, savedValue].find((value) =>
+                    value === 'auto' || this.cameraDevices.some((device) => device.deviceId === value)
+                ) || 'auto';
+
+                cameraDevice.value = preferredValue;
+                delete cameraDevice.dataset.savedValue;
+                this.saveCameraSettings();
+            }
+
+            pickDeviceByPreference() {
+                if (!this.cameraDevices.length) {
+                    return null;
+                }
+
+                const exactDeviceId = document.getElementById('cameraDevice').value;
+                if (exactDeviceId && exactDeviceId !== 'auto') {
+                    return this.cameraDevices.find((device) => device.deviceId === exactDeviceId) || null;
+                }
+
+                const preference = document.getElementById('cameraPreference').value;
+                const phoneCamera = this.cameraDevices.find((device) => this.isPhoneCameraLabel(device.label));
+                const builtInCamera = this.cameraDevices.find((device) => this.isBuiltInCameraLabel(device.label));
+
+                if (preference === 'phone') {
+                    return phoneCamera || this.cameraDevices[0];
+                }
+
+                if (preference === 'builtin') {
+                    return builtInCamera || this.cameraDevices[0];
+                }
+
+                return phoneCamera || builtInCamera || this.cameraDevices[0];
+            }
+
+            updateCameraHelp(customMessage = '') {
+                const helpEl = document.getElementById('cameraHelp');
+
+                if (customMessage) {
+                    helpEl.textContent = customMessage;
+                    return;
+                }
+
+                if (!this.cameraDevices.length) {
+                    helpEl.textContent = 'Click "Refresh Cameras" or "Start Automatic Attendance" to detect iVCam and webcam options.';
+                    return;
+                }
+
+                const selectedDevice = this.pickDeviceByPreference();
+                if (!selectedDevice) {
+                    helpEl.textContent = `Detected ${this.cameraDevices.length} camera(s). Choose the one you want to use.`;
+                    return;
+                }
+
+                const selectedLabel = this.formatDeviceLabel(
+                    selectedDevice,
+                    this.cameraDevices.findIndex((device) => device.deviceId === selectedDevice.deviceId)
+                );
+                helpEl.textContent = `Detected ${this.cameraDevices.length} camera(s). Current choice: ${selectedLabel}.`;
+            }
+
+            async buildVideoConstraints() {
+                await this.refreshCameraOptions(true);
+
+                const selectedDevice = this.pickDeviceByPreference();
+                const baseConstraints = {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                };
+
+                if (selectedDevice) {
+                    return {
+                        video: {
+                            ...baseConstraints,
+                            deviceId: { exact: selectedDevice.deviceId }
+                        },
+                        audio: false
+                    };
+                }
+
+                return {
+                    video: {
+                        ...baseConstraints,
+                        facingMode: 'user'
+                    },
+                    audio: false
+                };
+            }
+
+            getActiveTrackLabel() {
+                if (!this.stream) {
+                    return '';
+                }
+
+                const [track] = this.stream.getVideoTracks();
+                return track ? this.normalizeLabel(track.label) : '';
+            }
+
+            async startCamera() {
+                if (this.stream) {
+                    return;
+                }
+
+                try {
+                    const constraints = await this.buildVideoConstraints();
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.permissionPrimed = true;
+
+                    this.video.srcObject = this.stream;
+                    document.getElementById('cameraSection').classList.add('active');
+                    document.getElementById('startCameraBtn').disabled = true;
+
+                    await this.refreshCameraOptions(false);
+                    const activeLabel = this.getActiveTrackLabel();
+                    this.updateScannerStatus('Scanning for faces...', true);
+                    this.showStatus(
+                        activeLabel
+                            ? `Camera started using ${activeLabel}. Attendance will be marked automatically.`
+                            : 'Camera started. Attendance will be marked automatically when a registered face is detected.',
+                        'info'
+                    );
+
+                    await this.waitForVideoReady();
+                    this.startAutoDetection();
+                } catch (error) {
+                    console.error('Camera access error:', error);
+                    this.showStatus('Camera access denied or selected camera is unavailable. Please allow permission or choose another camera.', 'error');
+                }
+            }
+
+            async waitForVideoReady() {
+                if (this.video.readyState >= 2 && this.video.videoWidth > 0) {
+                    return;
+                }
+
+                await new Promise((resolve) => {
+                    const onLoaded = () => {
+                        this.video.removeEventListener('loadeddata', onLoaded);
+                        resolve();
+                    };
+                    this.video.addEventListener('loadeddata', onLoaded);
+                });
+            }
+
+            startAutoDetection() {
+                this.stopAutoDetection();
+                this.autoDetectionActive = true;
+
+                const scanLoop = async () => {
+                    if (!this.stream || !this.autoDetectionActive) {
+                        return;
+                    }
+
+                    await this.captureAttendance();
+                    if (this.stream && this.autoDetectionActive) {
+                        this.scanTimer = window.setTimeout(scanLoop, 1500);
+                    }
+                };
+
+                this.scanTimer = window.setTimeout(scanLoop, 1000);
+            }
+
+            stopAutoDetection() {
+                this.autoDetectionActive = false;
+                if (this.scanTimer) {
+                    window.clearTimeout(this.scanTimer);
+                    this.scanTimer = null;
+                }
+            }
+
+            stopCamera(showMessage = true) {
+                this.stopAutoDetection();
+
+                if (this.stream) {
+                    this.stream.getTracks().forEach((track) => track.stop());
+                    this.stream = null;
+                }
+
+                this.video.srcObject = null;
+                document.getElementById('cameraSection').classList.remove('active');
+                document.getElementById('startCameraBtn').disabled = false;
+                this.updateScannerStatus('Camera is idle', false);
+                if (showMessage) {
+                    this.showStatus('Camera stopped.', 'info');
+                }
+            }
+
+            async captureAttendance() {
+                if (this.isProcessing || !this.stream || !this.video.videoWidth || !this.video.videoHeight) {
+                    return;
+                }
+
+                this.isProcessing = true;
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = this.video.videoWidth;
+                    canvas.height = this.video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(this.video, 0, 0);
+
+                    const base64Image = canvas.toDataURL('image/jpeg', 0.9);
+                    const response = await fetch('/mark_attendance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image: base64Image })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.displayAttendanceResult(result.data);
+                        this.updateScannerStatus('Attendance marked successfully', true);
+                        this.showStatus('Attendance marked automatically.', 'success');
+                        this.stopAutoDetection();
+                        window.setTimeout(() => this.stopCamera(false), 2000);
+                        return;
+                    }
+
+                    this.handleDetectionError(result.error || 'Unable to detect a valid face match.');
+                } catch (error) {
+                    console.error('Auto attendance error:', error);
+                    this.showStatus('Automatic attendance failed. Please try again.', 'error');
+                } finally {
+                    this.isProcessing = false;
+                }
+            }
+
+            handleDetectionError(message) {
+                const lower = message.toLowerCase();
+
+                if (lower.includes('no face detected')) {
+                    this.updateScannerStatus('Looking for a face...', true);
+                    this.showStatus(message, 'info', true);
+                    return;
+                }
+
+                if (lower.includes('multiple faces')) {
+                    this.updateScannerStatus('Multiple faces detected', true);
+                    this.showStatus(message, 'error', true);
+                    return;
+                }
+
+                if (lower.includes('unknown face') || lower.includes('too close to another')) {
+                    this.updateScannerStatus('Face not matched yet', true);
+                    this.showStatus(message, 'error', true);
+                    return;
+                }
+
+                if (lower.includes('already marked') || lower.includes('locked')) {
+                    this.updateScannerStatus('Attendance unavailable', false);
+                    this.showStatus(message, 'error');
+                    this.stopAutoDetection();
+                    window.setTimeout(() => this.stopCamera(false), 2200);
+                    return;
+                }
+
+                this.showStatus(message, 'error', true);
+            }
+
+            displayAttendanceResult(data) {
+                document.getElementById('studentName').textContent = data.name || '-';
+                document.getElementById('rollNumber').textContent = data.roll_no || '-';
+                document.getElementById('section').textContent = data.section || '-';
+                document.getElementById('attendanceDate').textContent = data.date || '-';
+                document.getElementById('attendanceTime').textContent = data.time || '-';
+
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.textContent = data.status || '-';
+                statusBadge.className = `status-badge ${(data.status || '').toLowerCase()}`;
+
+                document.getElementById('attendanceResult').classList.add('show');
+            }
+
+            updateScannerStatus(message, active) {
+                const statusBox = document.getElementById('scannerStatus');
+                document.getElementById('scannerStatusText').textContent = message;
+                statusBox.classList.toggle('active', Boolean(active));
+            }
+
+            showStatus(message, type, dedupe = false) {
+                const now = Date.now();
+                if (dedupe && this.lastStatusMessage === message && (now - this.lastStatusAt) < 2200) {
+                    return;
+                }
+
+                this.lastStatusMessage = message;
+                this.lastStatusAt = now;
+
+                const statusEl = document.getElementById('statusMessage');
+                statusEl.textContent = message;
+                statusEl.className = `status-message ${type} show`;
+
+                window.clearTimeout(this.statusTimer);
+                this.statusTimer = window.setTimeout(() => {
+                    statusEl.classList.remove('show');
+                }, 3500);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.faceAttendanceSystem = new FaceAttendanceSystem();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (window.faceAttendanceSystem && window.faceAttendanceSystem.stream) {
+                window.faceAttendanceSystem.stream.getTracks().forEach((track) => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
